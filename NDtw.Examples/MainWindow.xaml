@@ -1,0 +1,61 @@
+﻿<Window x:Class="NDtw.Examples.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ndtwExamples="clr-namespace:NDtw.Examples"
+        xmlns:multiselect="clr-namespace:NDtw.Examples.Infrastructure.MultiSelect"
+        xmlns:dtwVisualizationWpf="clr-namespace:NDtw.Visualization.Wpf;assembly=NDtw.Visualization.Wpf"
+        Title="MainWindow" Height="650" Width="900">
+    <Window.DataContext>
+        <ndtwExamples:MainWindowViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Background="#20000000">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <TextBlock Margin="0 5 0 5" Text="Select 2 entities:"/>
+                <ListBox ItemsSource="{Binding Entities}" SelectionMode="Extended" 
+                    multiselect:MultiSelectorBehaviours.SynchronizedSelectedItems="{Binding SelectedEntities}" />
+                <TextBlock Margin="0 5 0 5" Text="Select 1 or more variables:"/>
+                <ListBox ItemsSource="{Binding Variables}" SelectionMode="Extended" 
+                    multiselect:MultiSelectorBehaviours.SynchronizedSelectedItems="{Binding SelectedVariables}" />
+                <DockPanel Margin="0 20 0 0">
+                    <CheckBox IsChecked="{Binding UseSekoeChibaMaxShift}" Content="Sekoe-Chiba band (max shift):"/>
+                    <TextBox Text="{Binding SekoeChibaMaxShift}" Width="50"/>
+                </DockPanel>
+                <DockPanel>
+                    <CheckBox IsChecked="{Binding UseSlopeConstraint}" Content="Ikatura paralelogram (slope constr.):"/>
+                </DockPanel>
+                <DockPanel>
+                    <Label Content="Diagonal (steps): " Width="100" Margin="12,0,0,0"/>
+                    <TextBox Text="{Binding SlopeConstraintDiagonal}" Width="30"/>
+                    <Label Content="Aside: " Width="45"/>
+                    <TextBox Text="{Binding SlopeConstraintAside}" Width="30"/>                    
+                </DockPanel>
+                <CheckBox IsChecked="{Binding DrawCost}" Content="Draw cost (matrix)"/>
+                <CheckBox IsChecked="{Binding DrawDistance}" Content="Draw distance (matrix)"/>
+                <Button Margin="0 10 0 0" Height="22" Width="100" Content="Recalculate" Command="{Binding RecalculateCommand}" />
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Grid.Row="1" Margin="8">
+                <CheckBox IsChecked="{Binding MeasurePerformance}" Content="Measure performance (250x dtw)"/>
+                <TextBlock Margin="20 0 0 0" Text="{Binding OperationDuration, StringFormat='{}{0:g}'}"/>
+            </StackPanel>
+        </Grid>
+        <DockPanel Grid.Column="1" Grid.RowSpan="2">
+            <TabControl TabStripPlacement="Bottom">
+                <TabItem Header="Time series">
+                    <dtwVisualizationWpf:DtwByVariablePlot Dtw="{Binding Dtw}" />
+                </TabItem>
+                <TabItem Header="Dtw matrix">
+                    <dtwVisualizationWpf:DtwMatrixPlot Dtw="{Binding Dtw}" DrawDistance="{Binding DrawDistance}" DrawCost="{Binding DrawCost}" />
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+    </Grid>
+</Window>
