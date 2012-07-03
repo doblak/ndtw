@@ -89,7 +89,7 @@ namespace NDtw
             _xLen = x[0].Length;
             _yLen = y[0].Length;
 
-            if(_xLen != _yLen)
+            if(_xLen == 0 || _yLen == 0)
                 throw new ArgumentException("Both series should have at least one value.");
 
             if(maxShift != null && maxShift < 0)
