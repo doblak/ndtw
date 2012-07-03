@@ -12,4 +12,5 @@ Features:
 * Series DTW visualization
 * Matrix DTW visualization
 
-See wiki for screenshots.
+Visualization example:
+![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization.png)
