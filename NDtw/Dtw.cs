@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NDtw
 {
@@ -29,8 +30,12 @@ namespace NDtw
     {
         private readonly int _xLen;
         private readonly int _yLen;
+        private readonly bool _isXLongerOrEqual;
+        private readonly int _signalsLengthDifference;
         private readonly double[][] _xSeriesByVariable;
         private readonly double[][] _ySeriesByVariable;
+        private readonly bool _boundaryConstraintStart;
+        private readonly bool _boundaryConstraintEnd;
         private readonly int _maxShift;
         private bool _calculated;
         private double[][] _distances;
@@ -49,11 +54,13 @@ namespace NDtw
         /// </summary>
         /// <param name="x">Series A, array of values.</param>
         /// <param name="y">Series B, array of values.</param>
+        /// <param name="boundaryConstraintStart">Apply boundary constraint at (1, 1).</param>
+        /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
         /// <param name="maxShift">Sekoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
-        public Dtw(double[] x, double[] y, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
-            : this(new[] { x }, new[] { y }, slopeStepSizeDiagonal, slopeStepSizeAside, maxShift)
+        public Dtw(double[] x, double[] y, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
+            : this(new[] { x }, new[] { y }, boundaryConstraintStart, boundaryConstraintEnd, slopeStepSizeDiagonal, slopeStepSizeAside, maxShift)
         {
             
         }
@@ -63,13 +70,17 @@ namespace NDtw
         /// </summary>
         /// <param name="x">Series A, first dimension is for variable, second dimension for actual values.</param>
         /// <param name="y">Series B, first dimension is for variable, second dimension for actual values.</param>
+        /// <param name="boundaryConstraintStart">Apply boundary constraint at (1, 1).</param>
+        /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
         /// <param name="maxShift">Sekoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
-        public Dtw(double[][] x, double[][] y, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
+        public Dtw(double[][] x, double[][] y, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
         {
             _xSeriesByVariable = x;
             _ySeriesByVariable = y;
+            _boundaryConstraintStart = boundaryConstraintStart;
+            _boundaryConstraintEnd = boundaryConstraintEnd;
 
             if (x.Length == 0 || y.Length == 0)
                 throw new ArgumentException("Series should have values for at least one variable.");
@@ -95,13 +106,9 @@ namespace NDtw
             if(maxShift != null && maxShift < 0)
                 throw new ArgumentException("Sekoe-Chiba max shift value should be positive or null.");
 
-            _maxShift = maxShift ?? int.MaxValue;
-            
-            //todo: consider if this is even ok (larger maxshift when signals are not of equal length)?
-            var signalsLengthDifference = Math.Abs(_xLen - _yLen);
-            //temporary workaround
-            if (_maxShift <= int.MaxValue - signalsLengthDifference)
-                _maxShift += signalsLengthDifference;
+            _isXLongerOrEqual = _xLen >= _yLen;
+            _signalsLengthDifference = Math.Abs(_xLen - _yLen);
+            _maxShift = maxShift.HasValue ? maxShift.Value : int.MaxValue;
 
             if (slopeStepSizeAside != null || slopeStepSizeDiagonal != null)
             {
@@ -197,7 +204,9 @@ namespace NDtw
                     var xNeighbourCost = previousRowPathCost[j];
                     var yNeighbourCost = currentRowPathCost[j + 1];
 
-                    if (double.IsInfinity(diagonalNeighbourCost) && i - j == _xLen - _yLen)
+                    //on the topright edge, when boundary constrained only assign current distance as path distance to the (m, n) element
+                    //on the topright edge, when not boundary constrained, assign current distance as path distance to all edge elements
+                    if (double.IsInfinity(diagonalNeighbourCost) && (!_boundaryConstraintEnd || i - j == _xLen - _yLen))
                         currentRowPathCost[j] = currentRowDistances[j];
                     else if (diagonalNeighbourCost <= xNeighbourCost && diagonalNeighbourCost <= yNeighbourCost)
                     {
@@ -277,7 +286,9 @@ namespace NDtw
 
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
-                    if (Math.Abs(i - j) > _maxShift)
+                    if (_isXLongerOrEqual 
+                        ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
+                        : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift)
                     {
                         currentRowPathCost[j] = double.PositiveInfinity;
                         continue;
@@ -328,7 +339,9 @@ namespace NDtw
                         }
                     }
 
-                    if (double.IsInfinity(lowestCost) && i - j == _xLen - _yLen)
+                    //on the topright edge, when boundary constrained only assign current distance as path distance to the (m, n) element
+                    //on the topright edge, when not boundary constrained, assign current distance as path distance to all edge elements
+                    if (double.IsInfinity(lowestCost) && (!_boundaryConstraintEnd || i - j == _xLen - _yLen))
                         lowestCost = 0;
 
                     currentRowPathCost[j] = lowestCost + currentRowDistances[j];
@@ -358,7 +371,10 @@ namespace NDtw
         {
             Calculate();
 
-            return _pathCost[0][0];
+            if(_boundaryConstraintStart)
+                return _pathCost[0][0];
+
+            return Math.Min(_pathCost[0].Min(), _pathCost.Select(y => y[0]).Min());
         }
 
         public Tuple<int, int>[] GetPath()
@@ -368,8 +384,32 @@ namespace NDtw
             var path = new List<Tuple<int, int>>();
             var indexX = 0;
             var indexY = 0;
+            if(!_boundaryConstraintStart)
+            {
+                //find the starting element with lowest cost
+                var min = double.PositiveInfinity;
+                for (int i = 0; i < Math.Max(_xLen, _yLen); i++)
+                {
+                    if (i < _xLen && _pathCost[i][0] < min)
+                    {
+                        indexX = i;
+                        indexY = 0;
+                        min = _pathCost[i][0];
+                    }
+                    if (i < _yLen && _pathCost[0][i] < min)
+                    {
+                        indexX = 0;
+                        indexY = i;
+                        min = _pathCost[0][i];
+                    }
+                }
+            }
+
             path.Add(new Tuple<int, int>(indexX, indexY));
-            while (indexX < _xLen - 1 || indexY < _yLen - 1)
+            while (
+                _boundaryConstraintEnd 
+                ? (indexX < _xLen - 1 || indexY < _yLen - 1) 
+                : (indexX < _xLen - 1 && indexY < _yLen - 1))
             {
                 var stepX = _predecessorStepX[indexX][indexY];
                 var stepY = _predecessorStepY[indexX][indexY];

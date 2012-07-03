@@ -37,6 +37,8 @@ namespace NDtw.Examples
             var dtw = new Dtw(
                 seriesAMultivariateArray, 
                 seriesBMultivariateArray,
+                UseBoundaryConstraintStart,
+                UseBoundaryConstraintEnd,
                 UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
                 UseSlopeConstraint ? SlopeConstraintAside : (int?)null, 
                 UseSekoeChibaMaxShift ? SekoeChibaMaxShift : (int?)null);
@@ -51,6 +53,8 @@ namespace NDtw.Examples
                     var tempDtw = new Dtw(
                         seriesAMultivariateArray,
                         seriesBMultivariateArray,
+                        UseBoundaryConstraintStart,
+                        UseBoundaryConstraintEnd,
                         UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
                         UseSlopeConstraint ? SlopeConstraintAside : (int?)null,
                         UseSekoeChibaMaxShift ? SekoeChibaMaxShift : (int?)null);
@@ -88,6 +92,34 @@ namespace NDtw.Examples
         public ObservableCollection<string> SelectedVariables
         {
             get { return _selectedVariables; }
+        }
+
+        private bool _useBoundaryConstraintStart = true;
+        public bool UseBoundaryConstraintStart
+        {
+            get
+            {
+                return _useBoundaryConstraintStart;
+            }
+            set
+            {
+                _useBoundaryConstraintStart = value;
+                NotifyPropertyChanged(() => UseBoundaryConstraintStart);
+            }
+        }
+
+        private bool _useBoundaryConstraintEnd = true;
+        public bool UseBoundaryConstraintEnd
+        {
+            get
+            {
+                return _useBoundaryConstraintEnd;
+            }
+            set
+            {
+                _useBoundaryConstraintEnd = value;
+                NotifyPropertyChanged(() => UseBoundaryConstraintEnd);
+            }
         }
 
         private bool _useSekoeChibaMaxShift = true;
