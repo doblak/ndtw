@@ -30,7 +30,7 @@ namespace NDtw
     {
         private readonly int _xLen;
         private readonly int _yLen;
-        private readonly bool _isXLongerOrEqual;
+        private readonly bool _isXLongerOrEqualThanY;
         private readonly int _signalsLengthDifference;
         private readonly double[][] _xSeriesByVariable;
         private readonly double[][] _ySeriesByVariable;
@@ -106,7 +106,7 @@ namespace NDtw
             if(maxShift != null && maxShift < 0)
                 throw new ArgumentException("Sekoe-Chiba max shift value should be positive or null.");
 
-            _isXLongerOrEqual = _xLen >= _yLen;
+            _isXLongerOrEqualThanY = _xLen >= _yLen;
             _signalsLengthDifference = Math.Abs(_xLen - _yLen);
             _maxShift = maxShift.HasValue ? maxShift.Value : int.MaxValue;
 
@@ -194,7 +194,10 @@ namespace NDtw
 
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
-                    if (Math.Abs(i - j) > _maxShift)
+                    //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
+                    if (_isXLongerOrEqualThanY
+                       ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
+                       : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift)
                     {
                         currentRowPathCost[j] = double.PositiveInfinity;
                         continue;
@@ -286,7 +289,8 @@ namespace NDtw
 
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
-                    if (_isXLongerOrEqual 
+                    //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
+                    if (_isXLongerOrEqualThanY 
                         ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
                         : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift)
                     {
