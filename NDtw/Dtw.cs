@@ -36,6 +36,7 @@ namespace NDtw
         private readonly double[][] _ySeriesByVariable;
         private readonly bool _boundaryConstraintStart;
         private readonly bool _boundaryConstraintEnd;
+        private readonly bool _sekoeChibaConstraint;
         private readonly int _maxShift;
         private bool _calculated;
         private double[][] _distances;
@@ -108,8 +109,9 @@ namespace NDtw
 
             _isXLongerOrEqualThanY = _xLen >= _yLen;
             _signalsLengthDifference = Math.Abs(_xLen - _yLen);
+            _sekoeChibaConstraint = maxShift.HasValue;
             _maxShift = maxShift.HasValue ? maxShift.Value : int.MaxValue;
-
+            
             if (slopeStepSizeAside != null || slopeStepSizeDiagonal != null)
             {
                 if (slopeStepSizeAside == null || slopeStepSizeDiagonal == null)
@@ -195,7 +197,7 @@ namespace NDtw
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
                     //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
-                    if (_isXLongerOrEqualThanY
+                    if (_sekoeChibaConstraint && _isXLongerOrEqualThanY
                        ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
                        : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift)
                     {
@@ -290,7 +292,7 @@ namespace NDtw
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
                     //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
-                    if (_isXLongerOrEqualThanY 
+                    if (_sekoeChibaConstraint && _isXLongerOrEqualThanY 
                         ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
                         : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift)
                     {
