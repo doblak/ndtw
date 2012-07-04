@@ -128,7 +128,9 @@ namespace NDtw
                 _slopeStepSizeDiagonal = slopeStepSizeDiagonal.Value;
 
                 _slopeMatrixLookbehind = slopeStepSizeDiagonal.Value + slopeStepSizeAside.Value;
-            }            
+            }        
+    
+            //todo: throw error when solution (path from (1, 1) to (m, n) is not even possible due to slope constraints)
         }
 
         private void InitializeArrays()
@@ -197,9 +199,10 @@ namespace NDtw
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
                     //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
-                    if (_sekoeChibaConstraint && _isXLongerOrEqualThanY
+                    if (_sekoeChibaConstraint && 
+                        (_isXLongerOrEqualThanY
                        ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
-                       : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift)
+                       : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift))
                     {
                         currentRowPathCost[j] = double.PositiveInfinity;
                         continue;
@@ -292,9 +295,10 @@ namespace NDtw
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
                     //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
-                    if (_sekoeChibaConstraint && _isXLongerOrEqualThanY 
+                    if (_sekoeChibaConstraint && 
+                        (_isXLongerOrEqualThanY 
                         ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
-                        : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift)
+                        : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift))
                     {
                         currentRowPathCost[j] = double.PositiveInfinity;
                         continue;
