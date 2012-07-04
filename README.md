@@ -17,3 +17,8 @@ Features:
 ![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization-series.png)
 
 ![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization-matrix.png)
+
+Thanks to:
+* http://oxyplot.codeplex.com/, a great charting library
+* Sample data provider: 'Classification of individual consumption by purpose - 1998 (COICOP), source: Eurostat'
+* everyone else for various code snippets (mentioned in code)
