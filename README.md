@@ -14,6 +14,6 @@ Features:
 * Visualization WPF user controls included: Series DTW visualization, Matrix DTW visualization
 * examples application 
 
-![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization.png)
+![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization-series.png)
 
-![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization2.png)
+![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization-matrix.png)
