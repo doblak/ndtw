@@ -7,6 +7,7 @@ Features:
 
 * C# code optimized for performance
 * Single or multivariate
+* Optional boundary constraints
 * Sekoe-Chiba band
 * Ikatura paralelogram (custom slope constraint can be specified which results in such paralelogram)
 * Visualization WPF user controls included: Series DTW visualization, Matrix DTW visualization
