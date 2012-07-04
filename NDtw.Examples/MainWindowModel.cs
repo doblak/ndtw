@@ -37,6 +37,7 @@ namespace NDtw.Examples
             var dtw = new Dtw(
                 seriesAMultivariateArray, 
                 seriesBMultivariateArray,
+                DistanceMeasure.Euclidean,
                 UseBoundaryConstraintStart,
                 UseBoundaryConstraintEnd,
                 UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
@@ -53,6 +54,7 @@ namespace NDtw.Examples
                     var tempDtw = new Dtw(
                         seriesAMultivariateArray,
                         seriesBMultivariateArray,
+                        DistanceMeasure.Euclidean,
                         UseBoundaryConstraintStart,
                         UseBoundaryConstraintEnd,
                         UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,

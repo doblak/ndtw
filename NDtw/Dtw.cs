@@ -34,6 +34,7 @@ namespace NDtw
         private readonly int _signalsLengthDifference;
         private readonly double[][] _xSeriesByVariable;
         private readonly double[][] _ySeriesByVariable;
+        private readonly DistanceMeasure _distanceMeasure;
         private readonly bool _boundaryConstraintStart;
         private readonly bool _boundaryConstraintEnd;
         private readonly bool _sekoeChibaConstraint;
@@ -55,13 +56,14 @@ namespace NDtw
         /// </summary>
         /// <param name="x">Series A, array of values.</param>
         /// <param name="y">Series B, array of values.</param>
+        /// /// <param name="distanceMeasure">Distance measure used (how distance for value pair (p,q) of signal elements is calculated from multiple variables).</param>
         /// <param name="boundaryConstraintStart">Apply boundary constraint at (1, 1).</param>
         /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
         /// <param name="maxShift">Sekoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
-        public Dtw(double[] x, double[] y, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
-            : this(new[] { x }, new[] { y }, boundaryConstraintStart, boundaryConstraintEnd, slopeStepSizeDiagonal, slopeStepSizeAside, maxShift)
+        public Dtw(double[] x, double[] y, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
+            : this(new[] { x }, new[] { y }, distanceMeasure, boundaryConstraintStart, boundaryConstraintEnd, slopeStepSizeDiagonal, slopeStepSizeAside, maxShift)
         {
             
         }
@@ -71,15 +73,17 @@ namespace NDtw
         /// </summary>
         /// <param name="x">Series A, first dimension is for variable, second dimension for actual values.</param>
         /// <param name="y">Series B, first dimension is for variable, second dimension for actual values.</param>
+        /// <param name="distanceMeasure">Distance measure used (how distance for value pair (p,q) of signal elements is calculated from multiple variables).</param>
         /// <param name="boundaryConstraintStart">Apply boundary constraint at (1, 1).</param>
         /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
         /// <param name="maxShift">Sekoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
-        public Dtw(double[][] x, double[][] y, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
+        public Dtw(double[][] x, double[][] y, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
         {
             _xSeriesByVariable = x;
             _ySeriesByVariable = y;
+            _distanceMeasure = distanceMeasure;
             _boundaryConstraintStart = boundaryConstraintStart;
             _boundaryConstraintEnd = boundaryConstraintEnd;
 
@@ -176,10 +180,25 @@ namespace NDtw
                     var xVal = xSeriesForVariable[i];
                     for (int j = 0; j < _yLen; j++)
                     {
-                        currentDistances[j] += Math.Abs(xVal - ySeriesForVariable[j]);
+                        if(_distanceMeasure == DistanceMeasure.Manhattan)
+                            currentDistances[j] += Math.Abs(xVal - ySeriesForVariable[j]);
+                        else
+                        {
+                            //Math.Pow(xVal - ySeriesForVariable[j], 2) is much slower, so direct multiplication with temporary variable is used
+                            var dist = xVal - ySeriesForVariable[j];
+                            currentDistances[j] += dist*dist;
+                        }        
                     }
                 }
             }
+
+            if(_distanceMeasure == DistanceMeasure.Euclidean)
+                for (int i = 0; i < _xLen; i++)
+                {
+                    var currentDistances = _distances[i];
+                    for (int j = 0; j < _yLen; j++)
+                        currentDistances[j] = Math.Sqrt(currentDistances[j]);
+                }
         }
 
         private void CalculateWithoutSlopeConstraint()

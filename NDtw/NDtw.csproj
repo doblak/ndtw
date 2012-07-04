@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DistanceMeasure.cs" />
     <Compile Include="Dtw.cs" />
     <Compile Include="IDtw.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
