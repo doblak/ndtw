@@ -42,7 +42,7 @@ namespace NDtw.Examples
                 UseBoundaryConstraintEnd,
                 UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
                 UseSlopeConstraint ? SlopeConstraintAside : (int?)null, 
-                UseSekoeChibaMaxShift ? SekoeChibaMaxShift : (int?)null);
+                UseSakoeChibaMaxShift ? SakoeChibaMaxShift : (int?)null);
 
             if (MeasurePerformance)
             {
@@ -59,7 +59,7 @@ namespace NDtw.Examples
                         UseBoundaryConstraintEnd,
                         UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
                         UseSlopeConstraint ? SlopeConstraintAside : (int?)null,
-                        UseSekoeChibaMaxShift ? SekoeChibaMaxShift : (int?)null);
+                        UseSakoeChibaMaxShift ? SakoeChibaMaxShift : (int?)null);
                     var tempDtwPath = tempDtw.GetCost();
                 }
                 swDtwPerformance.Stop();
@@ -149,32 +149,32 @@ namespace NDtw.Examples
             }
         }
 
-        private bool _useSekoeChibaMaxShift = true;
-        public bool UseSekoeChibaMaxShift
+        private bool _useSakoeChibaMaxShift = true;
+        public bool UseSakoeChibaMaxShift
         {
             get
             {
-                return _useSekoeChibaMaxShift;
+                return _useSakoeChibaMaxShift;
             }
             set
             {
-                _useSekoeChibaMaxShift = value;
-                NotifyPropertyChanged(() => UseSekoeChibaMaxShift);
+                _useSakoeChibaMaxShift = value;
+                NotifyPropertyChanged(() => UseSakoeChibaMaxShift);
                 Recalculate();
             }
         }
 
-        private int _sekoeChibaMaxShift = 50;
-        public int SekoeChibaMaxShift
+        private int _sakoeChibaMaxShift = 50;
+        public int SakoeChibaMaxShift
         {
             get
             {
-                return _sekoeChibaMaxShift;
+                return _sakoeChibaMaxShift;
             }
             set
             {
-                _sekoeChibaMaxShift = value;
-                NotifyPropertyChanged(() => SekoeChibaMaxShift);
+                _sakoeChibaMaxShift = value;
+                NotifyPropertyChanged(() => SakoeChibaMaxShift);
             }
         }
 

@@ -9,7 +9,7 @@ Features:
 * Single or multivariate
 * Manhattan, Euclidean, SquaredEuclidean distance measures
 * Optional boundary constraints
-* Sekoe-Chiba band
+* Sakoe-Chiba band
 * Ikatura paralelogram (custom slope constraint can be specified which results in such paralelogram)
 * Visualization WPF user controls included: Series DTW visualization, Matrix DTW visualization
 * examples application 

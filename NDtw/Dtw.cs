@@ -37,7 +37,7 @@ namespace NDtw
         private readonly DistanceMeasure _distanceMeasure;
         private readonly bool _boundaryConstraintStart;
         private readonly bool _boundaryConstraintEnd;
-        private readonly bool _sekoeChibaConstraint;
+        private readonly bool _sakoeChibaConstraint;
         private readonly int _maxShift;
         private bool _calculated;
         private double[][] _distances;
@@ -61,7 +61,7 @@ namespace NDtw
         /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
-        /// <param name="maxShift">Sekoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
+        /// <param name="maxShift">Sakoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
         public Dtw(double[] x, double[] y, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
             : this(new[] { x }, new[] { y }, distanceMeasure, boundaryConstraintStart, boundaryConstraintEnd, slopeStepSizeDiagonal, slopeStepSizeAside, maxShift)
         {
@@ -78,7 +78,7 @@ namespace NDtw
         /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
-        /// <param name="maxShift">Sekoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
+        /// <param name="maxShift">Sakoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
         public Dtw(double[][] x, double[][] y, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
         {
             _xSeriesByVariable = x;
@@ -109,11 +109,11 @@ namespace NDtw
                 throw new ArgumentException("Both series should have at least one value.");
 
             if(maxShift != null && maxShift < 0)
-                throw new ArgumentException("Sekoe-Chiba max shift value should be positive or null.");
+                throw new ArgumentException("Sakoe-Chiba max shift value should be positive or null.");
 
             _isXLongerOrEqualThanY = _xLen >= _yLen;
             _signalsLengthDifference = Math.Abs(_xLen - _yLen);
-            _sekoeChibaConstraint = maxShift.HasValue;
+            _sakoeChibaConstraint = maxShift.HasValue;
             _maxShift = maxShift.HasValue ? maxShift.Value : int.MaxValue;
             
             if (slopeStepSizeAside != null || slopeStepSizeDiagonal != null)
@@ -217,8 +217,8 @@ namespace NDtw
 
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
-                    //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
-                    if (_sekoeChibaConstraint && 
+                    //Sakoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
+                    if (_sakoeChibaConstraint && 
                         (_isXLongerOrEqualThanY
                        ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
                        : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift))
@@ -313,8 +313,8 @@ namespace NDtw
 
                 for (int j = _yLen - 1; j >= 0; j--)
                 {
-                    //Sekoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
-                    if (_sekoeChibaConstraint && 
+                    //Sakoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
+                    if (_sakoeChibaConstraint && 
                         (_isXLongerOrEqualThanY 
                         ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
                         : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift))

@@ -32,8 +32,8 @@
                     <ListBox ItemsSource="{Binding DistanceMeasures}" SelectedItem="{Binding SelectedDistanceMeasure}" />
                 </DockPanel>
                 <DockPanel>
-                    <CheckBox IsChecked="{Binding UseSekoeChibaMaxShift}" Content="Sekoe-Chiba band (max shift):"/>
-                    <TextBox Text="{Binding SekoeChibaMaxShift}" Width="50"/>
+                    <CheckBox IsChecked="{Binding UseSakoeChibaMaxShift}" Content="Sakoe-Chiba band (max shift):"/>
+                    <TextBox Text="{Binding SakoeChibaMaxShift}" Width="50"/>
                 </DockPanel>
                     <CheckBox IsChecked="{Binding UseSlopeConstraint}" Content="Ikatura paralelogram (slope constr.):"/>
                 <DockPanel>
