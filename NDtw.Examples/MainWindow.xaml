@@ -28,6 +28,10 @@
                 <CheckBox Margin="0 20 0 0" IsChecked="{Binding UseBoundaryConstraintStart}" Content="Boundary constraint start"/>
                 <CheckBox IsChecked="{Binding UseBoundaryConstraintEnd}" Content="Boundary constraint end"/>
                 <DockPanel>
+                    <TextBlock Text="Distance:  " />
+                    <ListBox ItemsSource="{Binding DistanceMeasures}" SelectedItem="{Binding SelectedDistanceMeasure}" />
+                </DockPanel>
+                <DockPanel>
                     <CheckBox IsChecked="{Binding UseSekoeChibaMaxShift}" Content="Sekoe-Chiba band (max shift):"/>
                     <TextBox Text="{Binding SekoeChibaMaxShift}" Width="50"/>
                 </DockPanel>

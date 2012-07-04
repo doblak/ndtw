@@ -37,7 +37,7 @@ namespace NDtw.Examples
             var dtw = new Dtw(
                 seriesAMultivariateArray, 
                 seriesBMultivariateArray,
-                DistanceMeasure.Euclidean,
+                _selectedDistanceMeasure.Value,
                 UseBoundaryConstraintStart,
                 UseBoundaryConstraintEnd,
                 UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
@@ -54,7 +54,7 @@ namespace NDtw.Examples
                     var tempDtw = new Dtw(
                         seriesAMultivariateArray,
                         seriesBMultivariateArray,
-                        DistanceMeasure.Euclidean,
+                        _selectedDistanceMeasure.Value,
                         UseBoundaryConstraintStart,
                         UseBoundaryConstraintEnd,
                         UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
@@ -80,6 +80,15 @@ namespace NDtw.Examples
 
             Variables = new ObservableCollection<string>(DataSeries.GetVariables());
             SelectedVariables.Add(Variables[0]);
+
+            DistanceMeasures = new ObservableCollection<DistanceMeasure>()
+                                   {
+                                       DistanceMeasure.Manhattan, 
+                                       DistanceMeasure.Euclidean, 
+                                       DistanceMeasure.SquaredEuclidean
+                                   };
+            
+            SelectedDistanceMeasure = DistanceMeasure.Euclidean;
         }
 
         public ObservableCollection<string> Entities { get; private set; }
@@ -96,6 +105,20 @@ namespace NDtw.Examples
             get { return _selectedVariables; }
         }
 
+        public ObservableCollection<DistanceMeasure> DistanceMeasures { get; private set; }
+        
+        private DistanceMeasure? _selectedDistanceMeasure;
+        public DistanceMeasure? SelectedDistanceMeasure
+        {
+            get { return _selectedDistanceMeasure; }
+            set
+            {
+                _selectedDistanceMeasure = value;
+                NotifyPropertyChanged(() => SelectedDistanceMeasure);
+                Recalculate();
+            }
+        }
+
         private bool _useBoundaryConstraintStart = true;
         public bool UseBoundaryConstraintStart
         {
@@ -107,6 +130,7 @@ namespace NDtw.Examples
             {
                 _useBoundaryConstraintStart = value;
                 NotifyPropertyChanged(() => UseBoundaryConstraintStart);
+                Recalculate();
             }
         }
 
@@ -121,6 +145,7 @@ namespace NDtw.Examples
             {
                 _useBoundaryConstraintEnd = value;
                 NotifyPropertyChanged(() => UseBoundaryConstraintEnd);
+                Recalculate();
             }
         }
 
@@ -135,6 +160,7 @@ namespace NDtw.Examples
             {
                 _useSekoeChibaMaxShift = value;
                 NotifyPropertyChanged(() => UseSekoeChibaMaxShift);
+                Recalculate();
             }
         }
 
@@ -163,6 +189,7 @@ namespace NDtw.Examples
             {
                 _useSlopeConstraint = value;
                 NotifyPropertyChanged(() => UseSlopeConstraint);
+                Recalculate();
             }
         }
 
@@ -273,7 +300,7 @@ namespace NDtw.Examples
 
         public bool CanRecalculate
         {
-            get { return _selectedEntities.Count == 2 && _selectedVariables.Count >= 1; }
+            get { return _selectedEntities.Count == 2 && _selectedVariables.Count >= 1 && _selectedDistanceMeasure != null; }
         }
 
         private ICommand _recalculateCommand;
