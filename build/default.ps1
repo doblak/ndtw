@@ -52,6 +52,14 @@ Task Init -Depends Clean {
         -product "NDtw Visualization Wpf $version" `
         -version $version `
         -copyright "Darjan Oblak 2012"
+		
+	Generate-Assembly-Info `
+        -file "$solution_dir\NDtw.Examples\Properties\AssemblyInfo.cs" `
+        -title "NDtw Examples $version" `
+        -description "NDtw - Dynamic Time Warping (DTW) algorithm" `
+        -product "NDtw Examples $version" `
+        -version $version `
+        -copyright "Darjan Oblak 2012"
 }
 
 
