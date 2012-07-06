@@ -26,8 +26,8 @@
                 <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Variables}" CanUserAddRows="False" CanUserDeleteRows="False"
                           SelectionMode="Extended" multiselect:MultiSelectorBehaviours.SynchronizedSelectedItems="{Binding SelectedVariables}" >
                     <DataGrid.Columns>
-                        <DataGridTextColumn Binding="{Binding Name}" Header="Name" Width="80" IsReadOnly="True" />
-                        <DataGridTemplateColumn Header="Preprocessing" Width="70" >
+                        <DataGridTextColumn Binding="{Binding Name}" Header="Name" Width="120" IsReadOnly="True" />
+                        <DataGridTemplateColumn Header="Preprocessing" Width="60" >
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Label Content="{Binding Preprocessor}" Padding="0" Margin="0" />
