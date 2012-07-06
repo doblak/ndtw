@@ -1,9 +1,10 @@
-ndtw
+NDtw
 ====
 
 Dynamic Time Warping (DTW) algorithm implementation for .NET C#
 
-Features:
+Features
+====
 
 * Single or multivariate
 * Data preprocessing options (none, centering, normalization, standardization)
@@ -25,11 +26,20 @@ Usage:
 * very simple: var cost = new Dtw(seriesA, seriesB).GetCost();
 * or much more complex initialization of Dtw class with various features
 
+Screenshots
+====
+
 ![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization-series.png)
 
 ![DTW visualization](https://github.com/doblak/ndtw/raw/master/wiki/visualization-matrix.png)
 
-Thanks to:
+Thanks to
+====
+
 * http://oxyplot.codeplex.com/, a great charting library
 * Sample data provider: 'Classification of individual consumption by purpose - 1998 (COICOP), source: Eurostat'
 * everyone else for various code snippets (mentioned in code)
+
+License
+====
+NDtw is released under the MIT license: www.opensource.org/licenses/MIT
