@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using OxyPlot;
+using System.Linq;
 
 namespace NDtw.Visualization.Wpf
 {
@@ -30,8 +31,8 @@ namespace NDtw.Visualization.Wpf
             var dtwPath = Dtw.GetPath();
             var xLength = Dtw.XLength;
             var yLength = Dtw.YLength;
-            var seriesAMultivariate = Dtw.SeriesA;
-            var seriesBMultivariate = Dtw.SeriesB;
+            var seriesAMultivariate = Dtw.SeriesVariables.Select(x => x.GetPreprocessedXSeries()).ToArray();
+            var seriesBMultivariate = Dtw.SeriesVariables.Select(x => x.GetPreprocessedYSeries()).ToArray();
             var cost = Dtw.GetCost();
 
             var plotModel = new PlotModel(String.Format("Dtw ({0:0.00})", cost));

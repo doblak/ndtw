@@ -40,10 +40,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Preprocessing\CentralizationPreprocessor.cs" />
+    <Compile Include="Preprocessing\NonePreprocessor.cs" />
+    <Compile Include="Preprocessing\StandardizationPreprocessor.cs" />
+    <Compile Include="Preprocessing\NormalizationPreprocessor.cs" />
+    <Compile Include="Preprocessing\IPreprocessor.cs" />
     <Compile Include="DistanceMeasure.cs" />
     <Compile Include="Dtw.cs" />
     <Compile Include="IDtw.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SeriesVariable.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

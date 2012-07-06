@@ -32,13 +32,12 @@ namespace NDtw
         private readonly int _yLen;
         private readonly bool _isXLongerOrEqualThanY;
         private readonly int _signalsLengthDifference;
-        private readonly double[][] _xSeriesByVariable;
-        private readonly double[][] _ySeriesByVariable;
+        private readonly SeriesVariable[] _seriesVariables;
         private readonly DistanceMeasure _distanceMeasure;
         private readonly bool _boundaryConstraintStart;
         private readonly bool _boundaryConstraintEnd;
         private readonly bool _sakoeChibaConstraint;
-        private readonly int _maxShift;
+        private readonly int _sakoeChibaMaxShift;
         private bool _calculated;
         private double[][] _distances;
         private double[][] _pathCost;
@@ -61,9 +60,9 @@ namespace NDtw
         /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
-        /// <param name="maxShift">Sakoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
-        public Dtw(double[] x, double[] y, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
-            : this(new[] { x }, new[] { y }, distanceMeasure, boundaryConstraintStart, boundaryConstraintEnd, slopeStepSizeDiagonal, slopeStepSizeAside, maxShift)
+        /// <param name="sakoeChibaMaxShift">Sakoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
+        public Dtw(double[] x, double[] y, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? sakoeChibaMaxShift = null)
+            : this(new [] {new SeriesVariable(x, y), new SeriesVariable(x, y)}, distanceMeasure, boundaryConstraintStart, boundaryConstraintEnd, slopeStepSizeDiagonal, slopeStepSizeAside, sakoeChibaMaxShift)
         {
             
         }
@@ -71,50 +70,45 @@ namespace NDtw
         /// <summary>
         /// Initialize class that performs multivariate DTW calculation for given series and settings.
         /// </summary>
-        /// <param name="x">Series A, first dimension is for variable, second dimension for actual values.</param>
-        /// <param name="y">Series B, first dimension is for variable, second dimension for actual values.</param>
+        /// <param name="seriesVariables">Array of series value pairs for different variables with additional options for data preprocessing and weights.</param>
         /// <param name="distanceMeasure">Distance measure used (how distance for value pair (p,q) of signal elements is calculated from multiple variables).</param>
         /// <param name="boundaryConstraintStart">Apply boundary constraint at (1, 1).</param>
         /// <param name="boundaryConstraintEnd">Apply boundary constraint at (m, n).</param>
         /// <param name="slopeStepSizeDiagonal">Diagonal steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeAside parameter. Leave null for no constraint.</param>
         /// <param name="slopeStepSizeAside">Side steps in local window for calculation. Results in Ikatura paralelogram shaped dtw-candidate space. Use in combination with slopeStepSizeDiagonal parameter. Leave null for no constraint.</param>
-        /// <param name="maxShift">Sakoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
-        public Dtw(double[][] x, double[][] y, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? maxShift = null)
+        /// <param name="sakoeChibaMaxShift">Sakoe-Chiba max shift constraint (side steps). Leave null for no constraint.</param>
+        public Dtw(SeriesVariable[] seriesVariables, DistanceMeasure distanceMeasure = DistanceMeasure.Euclidean, bool boundaryConstraintStart = true, bool boundaryConstraintEnd = true, int? slopeStepSizeDiagonal = null, int? slopeStepSizeAside = null, int? sakoeChibaMaxShift = null)
         {
-            _xSeriesByVariable = x;
-            _ySeriesByVariable = y;
+            _seriesVariables = seriesVariables;
             _distanceMeasure = distanceMeasure;
             _boundaryConstraintStart = boundaryConstraintStart;
             _boundaryConstraintEnd = boundaryConstraintEnd;
 
-            if (x.Length == 0 || y.Length == 0)
+            if (seriesVariables == null || seriesVariables.Length == 0)
                 throw new ArgumentException("Series should have values for at least one variable.");
 
-            if(x.Length != y.Length)
-                throw new ArgumentException("Both series should have the same numbers of variables.");
-
-            for (int i = 0; i < _xSeriesByVariable.Length; i++)
+            for (int i = 1; i < _seriesVariables.Length; i++)
             {
-                if (x[i].Length != x[0].Length)
+                if (_seriesVariables[i].OriginalXSeries.Length != _seriesVariables[0].OriginalXSeries.Length)
                     throw new ArgumentException("All variables withing series should have the same number of values.");
 
-                if (y[i].Length != y[0].Length)
+                if (_seriesVariables[i].OriginalYSeries.Length != _seriesVariables[0].OriginalYSeries.Length)
                     throw new ArgumentException("All variables withing series should have the same number of values.");
             }
 
-            _xLen = x[0].Length;
-            _yLen = y[0].Length;
+            _xLen = _seriesVariables[0].OriginalXSeries.Length;
+            _yLen = _seriesVariables[0].OriginalYSeries.Length;
 
             if(_xLen == 0 || _yLen == 0)
                 throw new ArgumentException("Both series should have at least one value.");
 
-            if(maxShift != null && maxShift < 0)
+            if (sakoeChibaMaxShift != null && sakoeChibaMaxShift < 0)
                 throw new ArgumentException("Sakoe-Chiba max shift value should be positive or null.");
 
             _isXLongerOrEqualThanY = _xLen >= _yLen;
             _signalsLengthDifference = Math.Abs(_xLen - _yLen);
-            _sakoeChibaConstraint = maxShift.HasValue;
-            _maxShift = maxShift.HasValue ? maxShift.Value : int.MaxValue;
+            _sakoeChibaConstraint = sakoeChibaMaxShift.HasValue;
+            _sakoeChibaMaxShift = sakoeChibaMaxShift.HasValue ? sakoeChibaMaxShift.Value : int.MaxValue;
             
             if (slopeStepSizeAside != null || slopeStepSizeDiagonal != null)
             {
@@ -170,10 +164,13 @@ namespace NDtw
             }
 
             //calculate distances for 'data' part of the matrix
-            for (int variableIndex = 0; variableIndex < _xSeriesByVariable.Length; variableIndex++)
+            foreach (SeriesVariable seriesVariable in _seriesVariables)
             {
-                var xSeriesForVariable = _xSeriesByVariable[variableIndex];
-                var ySeriesForVariable = _ySeriesByVariable[variableIndex];
+                var xSeriesForVariable = seriesVariable.GetPreprocessedXSeries();
+                var ySeriesForVariable = seriesVariable.GetPreprocessedYSeries();
+                //weight for current variable distances that is applied BEFORE the value is further transformed by distance measure
+                var variableWeight = seriesVariable.Weight;
+
                 for (int i = 0; i < _xLen; i++)
                 {
                     var currentDistances = _distances[i];
@@ -181,11 +178,11 @@ namespace NDtw
                     for (int j = 0; j < _yLen; j++)
                     {
                         if(_distanceMeasure == DistanceMeasure.Manhattan)
-                            currentDistances[j] += Math.Abs(xVal - ySeriesForVariable[j]);
+                            currentDistances[j] += Math.Abs(xVal - ySeriesForVariable[j]) * variableWeight;
                         else
                         {
                             //Math.Pow(xVal - ySeriesForVariable[j], 2) is much slower, so direct multiplication with temporary variable is used
-                            var dist = xVal - ySeriesForVariable[j];
+                            var dist = (xVal - ySeriesForVariable[j]) * variableWeight;
                             currentDistances[j] += dist*dist;
                         }        
                     }
@@ -220,8 +217,8 @@ namespace NDtw
                     //Sakoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
                     if (_sakoeChibaConstraint && 
                         (_isXLongerOrEqualThanY
-                       ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
-                       : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift))
+                       ? j > i && j - i > _sakoeChibaMaxShift || j < i && i - j > _sakoeChibaMaxShift + _signalsLengthDifference
+                       : j > i && j - i > _sakoeChibaMaxShift + _signalsLengthDifference || j < i && i - j > _sakoeChibaMaxShift))
                     {
                         currentRowPathCost[j] = double.PositiveInfinity;
                         continue;
@@ -316,8 +313,8 @@ namespace NDtw
                     //Sakoe-Chiba constraint, but make it wider in one dimension when signal lengths are not equal
                     if (_sakoeChibaConstraint && 
                         (_isXLongerOrEqualThanY 
-                        ? j > i && j - i > _maxShift || j < i && i - j > _maxShift + _signalsLengthDifference
-                        : j > i && j - i > _maxShift + _signalsLengthDifference || j < i && i - j > _maxShift))
+                        ? j > i && j - i > _sakoeChibaMaxShift || j < i && i - j > _sakoeChibaMaxShift + _signalsLengthDifference
+                        : j > i && j - i > _sakoeChibaMaxShift + _signalsLengthDifference || j < i && i - j > _sakoeChibaMaxShift))
                     {
                         currentRowPathCost[j] = double.PositiveInfinity;
                         continue;
@@ -475,14 +472,9 @@ namespace NDtw
             get { return _yLen; }
         }
 
-        public double[][] SeriesA
+        public SeriesVariable[] SeriesVariables
         {
-            get { return _xSeriesByVariable; }
-        }
-        
-        public double[][] SeriesB
-        {
-            get { return _ySeriesByVariable; }
-        }
+            get { return _seriesVariables; }
+        }   
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Input;
 using NDtw.Examples.Infrastructure;
 using NDtw.Examples.Infrastructure.MultiSelect;
+using NDtw.Preprocessing;
 
 namespace NDtw.Examples
 {
@@ -23,27 +24,29 @@ namespace NDtw.Examples
             if (!CanRecalculate)
                 return;
 
-            var seriesAMultivariate = new List<IList<double>>();
+            var seriesVariables = new List<SeriesVariable>();
             foreach (var selectedVariable in SelectedVariables)
-                seriesAMultivariate.Add(DataSeries.GetValues(_selectedEntities[0], selectedVariable));
+            {
+                seriesVariables.Add(
+                    new SeriesVariable(
+                        DataSeries.GetValues(_selectedEntities[0], selectedVariable.Name).ToArray(),
+                        DataSeries.GetValues(_selectedEntities[1], selectedVariable.Name).ToArray(),
+                        selectedVariable.Name,
+                        selectedVariable.Preprocessor,
+                        selectedVariable.Weight));
+            }
 
-            var seriesBMultivariate = new List<IList<double>>();
-            foreach (var selectedVariable in SelectedVariables)
-                seriesBMultivariate.Add(DataSeries.GetValues(_selectedEntities[1], selectedVariable));
-
-            var seriesAMultivariateArray = seriesAMultivariate.Select(x => x.ToArray()).ToArray();
-            var seriesBMultivariateArray = seriesBMultivariate.Select(x => x.ToArray()).ToArray();
+            var seriesVariablesArray = seriesVariables.ToArray();
 
             var dtw = new Dtw(
-                seriesAMultivariateArray, 
-                seriesBMultivariateArray,
-                _selectedDistanceMeasure.Value,
+                seriesVariablesArray,
+                SelectedDistanceMeasure.Value,
                 UseBoundaryConstraintStart,
                 UseBoundaryConstraintEnd,
                 UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
                 UseSlopeConstraint ? SlopeConstraintAside : (int?)null, 
                 UseSakoeChibaMaxShift ? SakoeChibaMaxShift : (int?)null);
-
+            
             if (MeasurePerformance)
             {
                 var swDtwPerformance = new Stopwatch();
@@ -52,9 +55,8 @@ namespace NDtw.Examples
                 for (int i = 0; i < 250; i++)
                 {
                     var tempDtw = new Dtw(
-                        seriesAMultivariateArray,
-                        seriesBMultivariateArray,
-                        _selectedDistanceMeasure.Value,
+                        seriesVariablesArray,
+                        SelectedDistanceMeasure.Value,
                         UseBoundaryConstraintStart,
                         UseBoundaryConstraintEnd,
                         UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
@@ -75,11 +77,16 @@ namespace NDtw.Examples
             DataSeries = DataSeriesFactory.CreateMultivariateConsumptionByPurposeEurostat();
 
             Entities = new ObservableCollection<string>(DataSeries.GetEntities());
-            SelectedEntities.Add(Entities[0]);
-            SelectedEntities.Add(Entities[1]);
 
-            Variables = new ObservableCollection<string>(DataSeries.GetVariables());
-            SelectedVariables.Add(Variables[0]);
+            var nonePreprocessor = new NonePreprocessor();
+            Variables = new ObservableCollection<Variable>(DataSeries.GetVariables().Select(x => new Variable() { Name = x, Preprocessor = nonePreprocessor, Weight = 1 }));
+            Preprocessors = new ObservableCollection<IPreprocessor>()
+                                {
+                                    nonePreprocessor,
+                                    new CentralizationPreprocessor(),
+                                    new NormalizationPreprocessor(),
+                                    new StandardizationPreprocessor()
+                                };
 
             DistanceMeasures = new ObservableCollection<DistanceMeasure>()
                                    {
@@ -98,9 +105,11 @@ namespace NDtw.Examples
             get { return _selectedEntities; }
         }
 
-        public ObservableCollection<string> Variables { get; private set; }
-        private readonly ObservableCollection<string> _selectedVariables = new ObservableCollection<string>();
-        public ObservableCollection<string> SelectedVariables
+        public ObservableCollection<Variable> Variables { get; private set; }
+        public ObservableCollection<IPreprocessor> Preprocessors { get; private set; }
+
+        private readonly ObservableCollection<Variable> _selectedVariables = new ObservableCollection<Variable>();
+        public ObservableCollection<Variable> SelectedVariables
         {
             get { return _selectedVariables; }
         }

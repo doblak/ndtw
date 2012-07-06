@@ -10,7 +10,6 @@ namespace NDtw
         double[][] GetCostMatrix();
         int XLength { get; }
         int YLength { get; }
-        double[][] SeriesA { get; }
-        double[][] SeriesB { get; }
+        SeriesVariable[] SeriesVariables { get; }
     }
 }

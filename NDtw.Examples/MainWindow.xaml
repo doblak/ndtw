@@ -23,8 +23,26 @@
                 <ListBox ItemsSource="{Binding Entities}" SelectionMode="Extended" 
                     multiselect:MultiSelectorBehaviours.SynchronizedSelectedItems="{Binding SelectedEntities}" />
                 <TextBlock Margin="0 5 0 5" Text="Select 1 or more variables:"/>
-                <ListBox ItemsSource="{Binding Variables}" SelectionMode="Extended" 
-                    multiselect:MultiSelectorBehaviours.SynchronizedSelectedItems="{Binding SelectedVariables}" />
+                <DataGrid AutoGenerateColumns="False" ItemsSource="{Binding Variables}" CanUserAddRows="False" CanUserDeleteRows="False"
+                          SelectionMode="Extended" multiselect:MultiSelectorBehaviours.SynchronizedSelectedItems="{Binding SelectedVariables}" >
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Name}" Header="Name" Width="80" IsReadOnly="True" />
+                        <DataGridTemplateColumn Header="Preprocessing" Width="70" >
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding Preprocessor}" Padding="0" Margin="0" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox Height="22" SelectedItem="{Binding Preprocessor}" 
+                                              ItemsSource="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=DataContext.Preprocessors}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Binding="{Binding Weight}" Header="Weight" Width="30" />
+                    </DataGrid.Columns>
+                </DataGrid>
                 <CheckBox Margin="0 20 0 0" IsChecked="{Binding UseBoundaryConstraintStart}" Content="Boundary constraint start"/>
                 <CheckBox IsChecked="{Binding UseBoundaryConstraintEnd}" Content="Boundary constraint end"/>
                 <DockPanel>
