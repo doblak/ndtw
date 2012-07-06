@@ -11,7 +11,8 @@ Properties {
 	$solution_dir = 		"$root_dir"
 	$configuration =		"Release"
 	$platform =				"Any CPU"
-	$version = 				. .\psake_ext.ps1 Get-Version-From-Git-Tag
+	. .\psake_ext.ps1
+	$version = 				Get-Version-From-Git-Tag
 }
 
 FormatTaskName (("-"*25) + "[{0}]" + ("-"*25))
@@ -33,7 +34,9 @@ Task Clean {
 
 Task Init -Depends Clean {	
 	Write-Host "Initializing AssemblyInfo" -ForegroundColor Green
+
 	. .\psake_ext.ps1
+	
     Generate-Assembly-Info `
         -file "$solution_dir\NDtw\Properties\AssemblyInfo.cs" `
         -title "NDtw $version" `
