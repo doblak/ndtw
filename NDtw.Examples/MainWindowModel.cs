@@ -67,7 +67,18 @@ namespace NDtw.Examples
                 swDtwPerformance.Stop();
                 OperationDuration = swDtwPerformance.Elapsed;
             }
+
             Dtw = dtw;
+
+            //Dtw = new Dtw(
+            //    new[] { 4.0, 4.0, 4.5, 4.5, 5.0, 5.0, 5.0, 4.5, 4.5, 4.0, 4.0, 3.5 },
+            //    new[] { 1.0, 1.5, 2.0, 2.5, 3.5, 4.0, 3.0, 2.5, 2.0, 2.0, 2.0, 1.5 },
+            //    SelectedDistanceMeasure.Value,
+            //    UseBoundaryConstraintStart,
+            //    UseBoundaryConstraintEnd,
+            //    UseSlopeConstraint ? SlopeConstraintDiagonal : (int?)null,
+            //    UseSlopeConstraint ? SlopeConstraintAside : (int?)null,
+            //    UseSakoeChibaMaxShift ? SakoeChibaMaxShift : (int?)null);
         }
 
         public MultivariateDataSeriesRepository DataSeries { get; set; }

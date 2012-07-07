@@ -26,6 +26,8 @@ Usage:
 * very simple: var cost = new Dtw(seriesA, seriesB).GetCost();
 * or much more complex initialization of Dtw class with various features
 
+Available on NuGet.
+
 Screenshots
 ====
 
