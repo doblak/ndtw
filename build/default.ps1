@@ -20,6 +20,10 @@ Properties {
 
 FormatTaskName (("-"*25) + "[{0}]" + ("-"*25))
 
+$framework = '4.0'
+
+include .\psake_ext.ps1
+
 Task Default -depends Package
 
 Task Clean {
