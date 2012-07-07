@@ -7,8 +7,11 @@
 Properties {
 	$base_dir = 			resolve-path .
 	$root_dir = 			resolve-path .\..
-	$build_dir = 			"$base_dir\Build"
+	$build_dir = 			"$base_dir\build"
+	$release_dir = 			"$base_dir\release"
 	$solution_dir = 		"$root_dir"
+	$packageinfo_dir = 		"$base_dir\packaging"
+	$tools_dir = 			"$base_dir\tools"
 	$configuration =		"Release"
 	$platform =				"Any CPU"
 	. .\psake_ext.ps1
@@ -17,16 +20,19 @@ Properties {
 
 FormatTaskName (("-"*25) + "[{0}]" + ("-"*25))
 
-Task Default -depends Build
+Task Default -depends Package
 
 Task Clean {
-	Write-Host "Creating Build directory" -ForegroundColor Green
+	Write-Host "Cleaning Build directory" -ForegroundColor Green
 	if (Test-Path $build_dir) 
 	{	
 		rd $build_dir -rec -force | out-null
 	}
 	
-	mkdir $build_dir | out-null
+	if (Test-Path $release_dir) 
+	{	
+		rd $release_dir -rec -force | out-null
+	}
 	
 	Write-Host "Cleaning NDtw.sln" -ForegroundColor Green
 	Exec { msbuild "$solution_dir\NDtw.sln" /t:Clean /p:Configuration=$configuration /p:Platform=$platform /v:quiet } 
@@ -60,10 +66,22 @@ Task Init -Depends Clean {
         -product "NDtw Examples $version" `
         -version $version `
         -copyright "Darjan Oblak 2012"
+		
+			
+	new-item $release_dir -itemType directory 
+	new-item $build_dir -itemType directory 
 }
 
 
-Task Build -Depends Init {	
+Task Release -Depends Init {	
 	Write-Host "Building NDtw.sln" -ForegroundColor Green
 	Exec { msbuild "$solution_dir\NDtw.sln" /t:Build /p:Configuration=$configuration /p:Platform=$platform /v:quiet /p:OutDir="$build_dir/" } 
+}
+
+task Package -depends Release {
+  $spec_files = @(Get-ChildItem $packageinfo_dir)
+  foreach ($spec in $spec_files)
+  {
+    & $tools_dir\NuGet.exe pack $spec.FullName -o $release_dir -Version $version -Symbols -BasePath $base_dir
+  }
 }
