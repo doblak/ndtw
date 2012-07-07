@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-    <id>NDtw</id>
+    <id>NDtw.Visualization.Wpf</id>
     <version>0.0.0</version>
     <authors>Darjan Oblak</authors>
     <owners>Darjan Oblak</owners>
@@ -9,10 +9,14 @@
     <projectUrl>https://github.com/doblak/ndtw</projectUrl>
     <iconUrl>https://github.com/doblak/ndtw/raw/master/wiki/images/dtw-icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Dynamic Time Warping (DTW) algorithm</description>
+    <description>Dynamic Time Warping (DTW) algorithm visualization</description>
     <tags>ndtw dtw dynamic time warping sequence similarity pattern recognition</tags>
+	<dependencies>
+	  <dependency id="NDtw" />
+      <dependency id="OxyPlot.Wpf" version="2012.3.118" />
+    </dependencies>
   </metadata>
   <files>
-    <file src="build\NDtw.dll" target="lib\net40" />
+    <file src="build\NDtw.Visualization.Wpf.dll" target="lib\net40" />
   </files>
 </package>
