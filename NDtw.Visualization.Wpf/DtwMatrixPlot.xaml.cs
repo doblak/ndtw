@@ -69,8 +69,9 @@ namespace NDtw.Visualization.Wpf
             var seriesAMultivariate = Dtw.SeriesVariables.Select(x => x.OriginalXSeries).ToArray();
             var seriesBMultivariate = Dtw.SeriesVariables.Select(x => x.OriginalYSeries).ToArray();
             var cost = Dtw.GetCost();
+            var costNormalized = Dtw.GetCost() / Math.Sqrt(xLength * xLength + yLength * yLength);
 
-            var plotModel = new PlotModel(String.Format("Dtw ({0:0.00})", cost));
+            var plotModel = new PlotModel(String.Format("Dtw norm by length: {0:0.00}, total: {1:0.00}", costNormalized, cost));
 
             if (matrixValues != null)
             {
