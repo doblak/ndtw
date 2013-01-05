@@ -103,7 +103,8 @@ namespace NDtw.Examples
                                    {
                                        DistanceMeasure.Manhattan, 
                                        DistanceMeasure.Euclidean, 
-                                       DistanceMeasure.SquaredEuclidean
+                                       DistanceMeasure.SquaredEuclidean,
+                                       DistanceMeasure.Maximum
                                    };
             
             SelectedDistanceMeasure = DistanceMeasure.Euclidean;

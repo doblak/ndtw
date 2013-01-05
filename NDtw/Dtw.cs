@@ -179,11 +179,13 @@ namespace NDtw
                     {
                         if(_distanceMeasure == DistanceMeasure.Manhattan)
                             currentDistances[j] += Math.Abs(xVal - ySeriesForVariable[j]) * variableWeight;
+                        else if (_distanceMeasure == DistanceMeasure.Maximum)
+                            currentDistances[j] = Math.Max(currentDistances[j], Math.Abs(xVal - ySeriesForVariable[j]) * variableWeight);
                         else
                         {
                             //Math.Pow(xVal - ySeriesForVariable[j], 2) is much slower, so direct multiplication with temporary variable is used
                             var dist = (xVal - ySeriesForVariable[j]) * variableWeight;
-                            currentDistances[j] += dist*dist;
+                            currentDistances[j] += dist * dist;
                         }        
                     }
                 }
