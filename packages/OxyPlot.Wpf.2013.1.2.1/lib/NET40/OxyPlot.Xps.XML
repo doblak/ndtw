@@ -4,14 +4,19 @@
         <name>OxyPlot.Xps</name>
     </assembly>
     <members>
-        <member name="T:OxyPlot.Wpf.XpsExporter">
+        <member name="T:OxyPlot.Xps.NamespaceDoc">
             <summary>
-            Exports or prints a PlotModel using xps.
+            The OxyPlot.Xps namespace contains classes providing output to .xps files.
             </summary>
         </member>
-        <member name="M:OxyPlot.Wpf.XpsExporter.Export(OxyPlot.PlotModel,System.String,System.Double,System.Double,OxyPlot.OxyColor)">
+        <member name="T:OxyPlot.Xps.XpsExporter">
             <summary>
-            Exports the specified plot model to an xps file.
+                Exports or prints a PlotModel to an xps file.
+            </summary>
+        </member>
+        <member name="M:OxyPlot.Xps.XpsExporter.Export(OxyPlot.PlotModel,System.String,System.Double,System.Double,OxyPlot.OxyColor)">
+            <summary>
+                Exports the specified plot model to an xps file.
             </summary>
             <param name="model">The model.</param>
             <param name="fileName">The file name.</param>
@@ -19,9 +24,9 @@
             <param name="height">The height.</param>
             <param name="background">The background color.</param>
         </member>
-        <member name="M:OxyPlot.Wpf.XpsExporter.Print(OxyPlot.PlotModel,System.Double,System.Double)">
+        <member name="M:OxyPlot.Xps.XpsExporter.Print(OxyPlot.PlotModel,System.Double,System.Double)">
             <summary>
-            Prints the specified plot model.
+                Prints the specified plot model.
             </summary>
             <param name="model">The model.</param>
             <param name="width">The width (using the actual media width if not specified).</param>

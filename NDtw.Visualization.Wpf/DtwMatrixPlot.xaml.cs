@@ -66,12 +66,13 @@ namespace NDtw.Visualization.Wpf
             var dtwPath = Dtw.GetPath();
             var xLength = Dtw.XLength;
             var yLength = Dtw.YLength;
-            var seriesAMultivariate = Dtw.SeriesVariables.Select(x => x.OriginalXSeries).ToArray();
-            var seriesBMultivariate = Dtw.SeriesVariables.Select(x => x.OriginalYSeries).ToArray();
             var cost = Dtw.GetCost();
             var costNormalized = Dtw.GetCost() / Math.Sqrt(xLength * xLength + yLength * yLength);
 
-            var plotModel = new PlotModel(String.Format("Dtw norm by length: {0:0.00}, total: {1:0.00}", costNormalized, cost));
+            var plotModel = new PlotModel(String.Format("Dtw norm by length: {0:0.00}, total: {1:0.00}", costNormalized, cost))
+                {
+                    LegendTextColor = DrawCost || DrawDistance ? OxyColors.White : OxyColors.Black,
+                };
 
             if (matrixValues != null)
             {
@@ -99,9 +100,42 @@ namespace NDtw.Visualization.Wpf
                             StrokeThickness = 0,
                             Selectable = false,
                             Layer = AnnotationLayer.BelowAxes,
-                            Fill = OxyColor.FromRGB(intensityBytes[0], intensityBytes[1], intensityBytes[2]),
+                            Fill = OxyColor.FromArgb(255, intensityBytes[0], intensityBytes[1], intensityBytes[2]),
                         });
                     }
+
+                for (int i = 0; i < 30; i++)
+                {
+                    var intensityBytes = GetFauxColourRgbIntensity(i, 0, 29);
+
+                    plotModel.Annotations.Add(new RectangleAnnotation
+                    {
+                        MinimumX = -39,
+                        MaximumX = -25,
+                        MinimumY = -i - 6,
+                        MaximumY = -i - 5,
+                        Selectable = false,
+                        Fill = OxyColor.FromArgb(255, intensityBytes[0], intensityBytes[1], intensityBytes[2])
+                    });                       
+                }
+
+                plotModel.Annotations.Add(new TextAnnotation
+                {
+                    Position = new DataPoint(-24, -5),
+                    HorizontalAlignment = HorizontalTextAlign.Left,
+                    VerticalAlignment = VerticalTextAlign.Middle,
+                    StrokeThickness = 0,
+                    Text = "0"
+                });
+
+                plotModel.Annotations.Add(new TextAnnotation
+                {
+                    Position = new DataPoint(-24, -34),
+                    HorizontalAlignment = HorizontalTextAlign.Left,
+                    VerticalAlignment = VerticalTextAlign.Middle,
+                    StrokeThickness = 0,
+                    Text = String.Format("{0:0.00}", maxMatrixValue),
+                });
             }
 
             var matrixPathSeries = new LineSeries("Path")
@@ -117,25 +151,27 @@ namespace NDtw.Visualization.Wpf
 
             var seriesMatrixScale = (xLength + yLength) * 0.05;
 
-            for (int variableIndex = 0; variableIndex < seriesAMultivariate.Length; variableIndex++)
+            for (int variableIndex = 0; variableIndex < Dtw.SeriesVariables.Length; variableIndex++)
             {
-                var seriesAVariable = seriesAMultivariate[variableIndex];
-                var seriesBVariable = seriesBMultivariate[variableIndex];
+                var variableA = Dtw.SeriesVariables[variableIndex];
+                var variableASeries = variableA.OriginalXSeries;
+                var variableB = Dtw.SeriesVariables[variableIndex];
+                var variableBSeries = variableB.OriginalYSeries;
 
-                var minSeriesA = seriesAVariable.Min();
-                var maxSeriesA = seriesAVariable.Max();
-                var normalizedSeriesA = seriesAVariable.Select(x => (x - minSeriesA) / (maxSeriesA - minSeriesA)).ToList();
-                var matrixSeriesA = new LineSeries("Series A");
+                var minSeriesA = variableASeries.Min();
+                var maxSeriesA = variableASeries.Max();
+                var normalizedSeriesA = variableASeries.Select(x => (x - minSeriesA) / (maxSeriesA - minSeriesA)).ToList();
+                var matrixSeriesA = new LineSeries(variableA.VariableName);
 
                 for (int i = 0; i < normalizedSeriesA.Count; i++)
                     matrixSeriesA.Points.Add(new DataPoint(i, (-1 + normalizedSeriesA[i]) * seriesMatrixScale - 1 - seriesMatrixScale * (variableIndex + 1)));
 
                 plotModel.Series.Add(matrixSeriesA);
 
-                var minSeriesB = seriesBVariable.Min();
-                var maxSeriesB = seriesBVariable.Max();
-                var normalizedSeriesB = seriesBVariable.Select(x => (x - minSeriesB) / (maxSeriesB - minSeriesB)).ToList();
-                var matrixSeriesB = new LineSeries("Series B");
+                var minSeriesB = variableBSeries.Min();
+                var maxSeriesB = variableBSeries.Max();
+                var normalizedSeriesB = variableBSeries.Select(x => (x - minSeriesB) / (maxSeriesB - minSeriesB)).ToList();
+                var matrixSeriesB = new LineSeries(variableB.VariableName);
 
                 for (int i = 0; i < normalizedSeriesB.Count; i++)
                     matrixSeriesB.Points.Add(new DataPoint( -normalizedSeriesB[i] * seriesMatrixScale - 1 - seriesMatrixScale * (variableIndex + 1), i));
@@ -143,8 +179,8 @@ namespace NDtw.Visualization.Wpf
                 plotModel.Series.Add(matrixSeriesB);
             }
 
-            plotModel.Axes.Add(new LinearAxis(AxisPosition.Bottom, "Series A") { Maximum = Math.Max(xLength, yLength), PositionAtZeroCrossing = true });
-            plotModel.Axes.Add(new LinearAxis(AxisPosition.Left, "Series B") { Maximum = Math.Max(xLength, yLength), PositionAtZeroCrossing = true});
+            plotModel.Axes.Add(new LinearAxis(AxisPosition.Bottom, "           Series A") { Maximum = Math.Max(xLength, yLength), PositionAtZeroCrossing = true});
+            plotModel.Axes.Add(new LinearAxis(AxisPosition.Left, "                  Series B") { Maximum = Math.Max(xLength, yLength), PositionAtZeroCrossing = true });
             
             MatrixPlot.Model = plotModel;
         }

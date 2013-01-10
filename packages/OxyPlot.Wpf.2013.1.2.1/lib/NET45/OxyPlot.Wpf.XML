@@ -1931,6 +1931,11 @@
             Stop listening to the CompositionTarget.Rendering event.
             </summary>
         </member>
+        <member name="T:OxyPlot.Wpf.NamespaceDoc">
+            <summary>
+            The OxyPlot.Wpf namespace contains WPF controls and classes providing output to bitmap and flow documents.
+            </summary>
+        </member>
         <member name="T:OxyPlot.Wpf.RenderingControl">
             <summary>
             Provides an abstract base class for Control objects that listens to the CompositionTarget.Rendering event.
