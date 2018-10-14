@@ -14,7 +14,7 @@ namespace NDtw.Examples.Infrastructure.MultiSelect
         /// <param name="masterListItem">The master list item.</param>
         /// <returns>The result of the conversion.</returns>
         object Convert(object masterListItem);
-
+        /// My changes
         /// <summary>
         /// Converts the specified target list item.
         /// </summary>
